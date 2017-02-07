@@ -60,17 +60,18 @@ GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 DOT = "."
 DASH = "-"
+UNKNOWN = "?"
 
-dash_length = 0.15
+dot_length = 0.15
 key_down_time = 0
 key_down_length = 0
 key_up_time = 0
 buffer = []
 
 if (len(sys.argv) > 1):
-	dash_length = float(sys.argv[1])
+	dot_length = float(sys.argv[1])
 
-print dash_length
+print dot_length
 
 thread.start_new_thread(decoder_thread, ())
 
@@ -84,5 +85,12 @@ while True:
     key_up_time = time.time() #record the time when the key was released
     key_down_length = key_up_time - key_down_time #get the length of time it was held down for
     tone_obj.stop()
-    #print key_down_length 
-    buffer.append(DASH if key_down_length > dash_length else DOT)
+    # print key_down_length 
+    # buffer.append(DASH if key_down_length > dot_length else DOT)
+    if key_down_length < dot_length:
+        symbol = DOT
+    elif key_down_length > 2.2*dot_length:
+	symbol = DASH
+    else:
+	symbol = UNKNOWN
+    buffer.append(symbol)
