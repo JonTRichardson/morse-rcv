@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 import pygame
 import time
 from RPi import GPIO
@@ -62,16 +63,24 @@ DOT = "."
 DASH = "-"
 UNKNOWN = "?"
 
-dot_length = 0.15
+dot_max = 0.15
 key_down_time = 0
 key_down_length = 0
 key_up_time = 0
 buffer = []
 
 if (len(sys.argv) > 1):
-	dot_length = float(sys.argv[1])
+	dot_max = float(sys.argv[1])
 
-print dot_length
+dash_min     = 2.5 * dot_max 
+letter_space = 2 * dot_max 
+word_space   = 7 * dot_max
+
+print( dot_max )
+print( dash_min )
+print( letter_space )
+print( word_space )
+print( "(WPM ~= 1 / dot_length)" )
 
 thread.start_new_thread(decoder_thread, ())
 
@@ -83,14 +92,14 @@ while True:
     tone_obj.play(-1) #the -1 means to loop the sound
     wait_for_keyup(pin)
     key_up_time = time.time() #record the time when the key was released
-    key_down_length = key_up_time - key_down_time #get the length of time it was held down for
+    key_down_length = key_up_time - key_down_time  # how long it was down
     tone_obj.stop()
-    # print key_down_length 
-    # buffer.append(DASH if key_down_length > dot_length else DOT)
-    if key_down_length < dot_length:
-        symbol = DOT
-    elif key_down_length > 2.2*dot_length:
-	symbol = DASH
+    if key_down_length < dot_max:
+        buffer.append(DOT)
+    elif key_down_length > 2.2*dot_max:
+        buffer.append(DASH)
     else:
-	symbol = UNKNOWN
-    buffer.append(symbol)
+        buffer.append(UNKNOWN)
+        bit_string = "".join(buffer)
+        print("\n" + bit_string )
+        del buffer[:]
